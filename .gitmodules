@@ -1,0 +1,4 @@
+[submodule "clearcorp/odoo-einvoicing"]
+	path = clearcorp/odoo-einvoicing
+	url = git@github.com:clearcorp/odoo-einvoicing.git
+	branch = 11.0
