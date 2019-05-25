@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+     <record model="ir.module.category" id="module_category_sh_motorcycle">
+         <field name="name">Motorcycle</field>
+         <field name="sequence">103</field>
+     </record>
+
+</data>
+</odoo>     
