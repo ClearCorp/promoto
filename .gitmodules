@@ -2,3 +2,8 @@
 	path = clearcorp/odoo-einvoicing
 	url = git@github.com:clearcorp/odoo-einvoicing.git
 	branch = 11.0
+
+[submodule "avilavenegas/motorcycle_set"]
+	path = avilavenegas/motorcycle_set
+	url = git@github.com:avilavenegas/motorcycle_set.git
+	branch = master
