@@ -6,3 +6,7 @@
 [submodule "avilavenegas/motorcycle_set"]
 	path = avilavenegas/motorcycle_set
 	url = git@github.com:avilavenegas/motorcycle_set.git
+[submodule "costarica"]
+	path = costarica
+	url = git@git.vauxoo.com:vauxoo/costarica.git
+	branch = 14.0
