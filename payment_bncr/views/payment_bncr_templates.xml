@@ -1,10 +1,302 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <odoo>
+    <!-- Template principal para el formulario de pago BNCR -->
+    <template id="payment_form_bncr" name="BNCR Payment Form">
+        <div class="o_bncr_payment_form">
+            <!-- Cargar el script del modal de BNCR -->
+            <script type="text/javascript" t-att-src="modal_script_url" defer="defer"></script>
+            
+            <!-- Formulario oculto con todos los parámetros para BNCR -->
+            <form name="bncr_payment_form" 
+                  id="bncr_payment_form" 
+                  method="post" 
+                  class="alignet-form-vpos2 d-none"
+                  t-att-action="api_url">
+                  
+                <!-- Parámetros obligatorios de BNCR -->
+                <input type="hidden" name="acquirerId" t-att-value="payment_data.get('acquirerId')"/>
+                <input type="hidden" name="idCommerce" t-att-value="payment_data.get('idCommerce')"/>
+                <input type="hidden" name="purchaseOperationNumber" t-att-value="payment_data.get('purchaseOperationNumber')"/>
+                <input type="hidden" name="purchaseAmount" t-att-value="payment_data.get('purchaseAmount')"/>
+                <input type="hidden" name="purchaseCurrencyCode" t-att-value="payment_data.get('purchaseCurrencyCode')"/>
+                <input type="hidden" name="language" t-att-value="payment_data.get('language', 'SP')"/>
+                <input type="hidden" name="programmingLanguage" t-att-value="payment_data.get('programmingLanguage', 'PHP')"/>
+                
+                <!-- Datos del cliente para shipping -->
+                <input type="hidden" name="shippingFirstName" t-att-value="payment_data.get('shippingFirstName')"/>
+                <input type="hidden" name="shippingLastName" t-att-value="payment_data.get('shippingLastName')"/>
+                <input type="hidden" name="shippingEmail" t-att-value="payment_data.get('shippingEmail')"/>
+                <input type="hidden" name="shippingAddress" t-att-value="payment_data.get('shippingAddress')"/>
+                <input type="hidden" name="shippingZIP" t-att-value="payment_data.get('shippingZIP')"/>
+                <input type="hidden" name="shippingCity" t-att-value="payment_data.get('shippingCity')"/>
+                <input type="hidden" name="shippingState" t-att-value="payment_data.get('shippingState')"/>
+                <input type="hidden" name="shippingCountry" t-att-value="payment_data.get('shippingCountry')"/>
+                
+                <!-- Campos reservados para datos adicionales -->
+                <input type="hidden" name="reserved1" t-att-value="payment_data.get('reserved1')"/>
+                <input type="hidden" name="reserved2" t-att-value="payment_data.get('reserved2')"/>
+                <input type="hidden" name="reserved3" t-att-value="payment_data.get('reserved3')"/>
+                
+                <!-- Verificación/Firma digital -->
+                <input type="hidden" name="purchaseVerification" t-att-value="payment_data.get('purchaseVerification')"/>
+            </form>
+            
+            <!-- Interfaz visible para el usuario -->
+            <div class="o_bncr_payment_interface">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex align-items-center">
+                            <img src="/payment_bncr/static/img/bncr_logo.png" 
+                                 alt="BNCR" 
+                                 class="me-3" 
+                                 style="height: 30px;"
+                                 onerror="this.style.display='none'"/>
+                            <h5 class="mb-0">Pago Seguro con BNCR</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fa fa-shield-alt fa-3x text-success mb-2"></i>
+                            <h6 class="text-muted">Conexión Segura y Encriptada</h6>
+                        </div>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <i class="fa fa-credit-card fa-2x text-primary mb-1"></i>
+                                <small class="d-block text-muted">Tarjetas de Crédito</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fa fa-university fa-2x text-primary mb-1"></i>
+                                <small class="d-block text-muted">Tarjetas de Débito</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="fa fa-mobile-alt fa-2x text-primary mb-1"></i>
+                                <small class="d-block text-muted">Compatible Móvil</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Mostrar detalles del pago -->
+                        <div class="alert alert-light">
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Monto a pagar:</strong></span>
+                                <span class="fw-bold text-success">
+                                    <t t-if="tx.currency_id.position == 'before'">
+                                        <t t-out="tx.currency_id.symbol"/><t t-out="'%.2f' % tx.amount"/>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-out="'%.2f' % tx.amount"/> <t t-out="tx.currency_id.symbol"/>
+                                    </t>
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Referencia:</strong></span>
+                                <span><t t-out="tx.reference"/></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Botón principal de pago -->
+                        <button type="button" 
+                                class="btn btn-primary btn-lg w-100 mb-3"
+                                id="bncr_pay_button"
+                                onclick="javascript:initBNCRPayment()">
+                            <i class="fa fa-credit-card me-2"></i>
+                            Proceder al Pago
+                        </button>
+                        
+                        <!-- Información de seguridad -->
+                        <div class="text-center">
+                            <small class="text-muted">
+                                <i class="fa fa-lock me-1"></i>
+                                Sus datos están protegidos con encriptación SSL de 256 bits
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading spinner -->
+            <div id="bncr_loading" class="text-center mt-3" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando sistema de pagos...</span>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">Iniciando sistema de pagos seguro...</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- JavaScript específico para BNCR -->
+        <script type="text/javascript">
+            
+            // Función principal para inicializar el pago
+            function initBNCRPayment() {
+                console.log('BNCR: Initializing payment...');
+                
+                // Mostrar loading
+                showBNCRLoading();
+                
+                // Verificar que el script de BNCR esté cargado
+                if (typeof AlignetVPOS2 === 'undefined') {
+                    console.error('BNCR: AlignetVPOS2 object not found');
+                    hideBNCRLoading();
+                    showBNCRError('Error: No se pudo cargar el sistema de pagos. Por favor, recarga la página.');
+                    return;
+                }
+                
+                try {
+                    // Configurar callbacks antes de abrir el modal
+                    setupBNCRCallbacks();
+                    
+                    // Abrir el modal de BNCR
+                    AlignetVPOS2.openModal('<t t-out="api_url"/>');
+                    
+                    console.log('BNCR: Modal opened successfully');
+                    
+                } catch (error) {
+                    console.error('BNCR: Error opening modal', error);
+                    hideBNCRLoading();
+                    showBNCRError('Error al abrir el sistema de pagos. Por favor, intenta nuevamente.');
+                }
+            }
+            
+            // Mostrar indicador de carga
+            function showBNCRLoading() {
+                document.getElementById('bncr_pay_button').disabled = true;
+                document.getElementById('bncr_loading').style.display = 'block';
+            }
+            
+            // Ocultar indicador de carga
+            function hideBNCRLoading() {
+                document.getElementById('bncr_pay_button').disabled = false;
+                document.getElementById('bncr_loading').style.display = 'none';
+            }
+            
+            // Mostrar error al usuario
+            function showBNCRError(message) {
+                alert(message);
+                // Alternativamente, podrías usar notificaciones de Odoo aquí
+            }
+            
+            // Configurar callbacks para manejar respuestas del modal
+            function setupBNCRCallbacks() {
+                
+                // Callback para cuando el pago es exitoso
+                window.bncrSuccessCallback = function(response) {
+                    console.log('BNCR: Payment successful', response);
+                    hideBNCRLoading();
+                    
+                    // Redirigir a página de confirmación
+                    window.location.href = '/payment/status?success=1&amp;tx_ref=' + encodeURIComponent('<t t-out="tx.reference"/>');
+                };
+                
+                // Callback para cuando el pago falla
+                window.bncrErrorCallback = function(error) {
+                    console.error('BNCR: Payment error', error);
+                    hideBNCRLoading();
+                    showBNCRError('Error en el procesamiento del pago: ' + (error.message || 'Error desconocido'));
+                };
+                
+                // Callback para cuando el usuario cancela
+                window.bncrCancelCallback = function() {
+                    console.log('BNCR: Payment cancelled by user');
+                    hideBNCRLoading();
+                    showBNCRError('Pago cancelado por el usuario.');
+                };
+                
+                // Manejar cierre del modal
+                window.addEventListener('beforeunload', function() {
+                    hideBNCRLoading();
+                });
+                
+                // Timeout de seguridad
+                setTimeout(function() {
+                    if (document.getElementById('bncr_loading').style.display !== 'none') {
+                        hideBNCRLoading();
+                        showBNCRError('El proceso de pago está tomando demasiado tiempo. Por favor, intenta nuevamente.');
+                    }
+                }, 300000); // 5 minutos
+            }
+            
+            // Auto-inicialización cuando se carga la página (opcional)
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('BNCR: Payment form loaded');
+                
+                // Verificar parámetros de la URL para mostrar mensajes
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('auto_open') === '1') {
+                    // Auto-abrir el modal si se especifica en la URL
+                    setTimeout(initBNCRPayment, 1000);
+                }
+            });
+            
+        </script>
+    </template>
 
-    <template id="redirect_form">
-        <!-- BNCR generates a unique URL for each payment request. -->
-        <form t-att-action="api_url" method="GET"/>
+    <!-- Template simplificado para checkout rápido -->
+    <template id="payment_form_bncr_inline" name="BNCR Inline Payment">
+        <div class="o_bncr_inline_payment">
+            <script type="text/javascript" t-att-src="modal_script_url" defer="defer"></script>
+            
+            <!-- Formulario oculto -->
+            <form name="bncr_form" id="bncr_form" method="post" class="alignet-form-vpos2 d-none">
+                <t t-foreach="payment_data.items()" t-as="item">
+                    <input type="hidden" t-att-name="item[0]" t-att-value="item[1]"/>
+                </t>
+            </form>
+            
+            <!-- Botón de pago inline -->
+            <button type="button" 
+                    class="btn btn-success btn-block"
+                    onclick="javascript:AlignetVPOS2.openModal('{api_url}')">
+                <i class="fa fa-credit-card"></i>
+                Pagar con BNCR
+            </button>
+        </div>
+    </template>
+
+    <!-- Template para mostrar estado del pago -->
+    <template id="bncr_payment_status" name="BNCR Payment Status">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <t t-if="tx.state == 'done'">
+                                <i class="fa fa-check-circle fa-4x text-success mb-3"></i>
+                                <h3 class="text-success">¡Pago Exitoso!</h3>
+                                <p class="lead">Su pago ha sido procesado correctamente</p>
+                                <div class="alert alert-success">
+                                    <strong>Transacción ID:</strong> <span t-out="tx.provider_reference"/>
+                                </div>
+                            </t>
+                            
+                            <t t-elif="tx.state == 'pending'">
+                                <i class="fa fa-clock fa-4x text-warning mb-3"></i>
+                                <h3 class="text-warning">Pago Pendiente</h3>
+                                <p class="lead">Su pago está siendo procesado</p>
+                                <div class="alert alert-warning">
+                                    Recibirá una confirmación por email una vez completado el proceso
+                                </div>
+                            </t>
+                            
+                            <t t-else="">
+                                <i class="fa fa-times-circle fa-4x text-danger mb-3"></i>
+                                <h3 class="text-danger">Error en el Pago</h3>
+                                <p class="lead">No se pudo procesar su pago</p>
+                                <div class="alert alert-danger">
+                                    Por favor, intente nuevamente o contacte soporte
+                                </div>
+                            </t>
+                            
+                            <div class="mt-4">
+                                <a href="/shop" class="btn btn-primary">Volver a la Tienda</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </template>
 
 </odoo>
