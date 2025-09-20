@@ -13,6 +13,11 @@
 		'data/payment_method_data.xml',
         'data/payment_provider_data.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'payment_bncr/static/src/scss/payment_bncr.scss',
+            'payment_bncr/static/src/js/payment_form.js',
+        ],
     'application': True,
     'installable': True,
     'post_init_hook': 'post_init_hook',
