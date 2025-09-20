@@ -27,31 +27,42 @@
             </group>
         </field>
     </record>
-    
+
+    <!-- Vista de formulario para transacciones con campos BNCR -->
     <record id="transaction_form_bncr" model="ir.ui.view">
         <field name="name">BNCR Transaction Form</field>
         <field name="model">payment.transaction</field>
-        <field name="inherit_id" ref="payment.payment_transaction_form" />
+        <field name="inherit_id" ref="payment.payment_transaction_form"/>
         <field name="arch" type="xml">
-            <field name="provider_reference" position="after">
-                <field name="acquirerId" invisible="provider_code != 'bncr'" />
-                <field name="idCommerce" invisible="provider_code != 'bncr'" />
-                <field name="purchaseOperationNumber" invisible="provider_code != 'bncr'" />
-                <field name="bncr_payment_id" invisible="provider_code != 'bncr'"  />
-                <field name="purchaseAmount" invisible="provider_code != 'bncr'"  />
-                <field name="purchaseCurrencyCode" invisible="provider_code != 'bncr'"  />
-                <field name="purchaseVerification" invisible="provider_code != 'bncr'"  />
-                <field name="bncr_refund_id" invisible="provider_code != 'bncr'"  />
-                <field name="bncr_refund_amount" invisible="provider_code != 'bncr'"  />
-                <field name="bncr_refund_currency" invisible="provider_code != 'bncr'"  />
-                <field name="bncr_refund_createdat" invisible="provider_code != 'bncr'"  />
-                <field name="reserved1" invisible="provider_code != 'bncr'" />
-                <field name="reserved22" invisible="provider_code != 'bncr'" />
-                <field name="reserved23" invisible="provider_code != 'bncr'" />
-                <field name="urlConfirm" invisible="provider_code != 'bncr'" />
-                <field name="urlResponse" invisible="provider_code != 'bncr'" />
-            </field>
+            <page name="extra_info" position="after">
+                <page string="BNCR Info" invisible="provider_code != 'bncr'">
+                    <group>
+                        <group string="Datos de Transacción BNCR">
+                            <field name="bncr_acquirer_id" readonly="1"/>
+                            <field name="bncr_commerce_id" readonly="1"/>
+                            <field name="bncr_purchase_operation_number" readonly="1"/>
+                            <field name="bncr_purchase_amount" readonly="1"/>
+                            <field name="bncr_purchase_currency_code" readonly="1"/>
+                            <field name="bncr_purchase_verification" readonly="1"/>
+                        </group>
+                        <group string="Datos de Envío">
+                            <field name="bncr_shipping_first_name" readonly="1"/>
+                            <field name="bncr_shipping_last_name" readonly="1"/>
+                            <field name="bncr_shipping_email" readonly="1"/>
+                            <field name="bncr_shipping_address" readonly="1"/>
+                            <field name="bncr_shipping_zip" readonly="1"/>
+                            <field name="bncr_shipping_city" readonly="1"/>
+                            <field name="bncr_shipping_state" readonly="1"/>
+                            <field name="bncr_shipping_country" readonly="1"/>
+                        </group>
+                        <group string="Campos Reservados">
+                            <field name="bncr_reserved1" readonly="1"/>
+                            <field name="bncr_reserved2" readonly="1"/>
+                            <field name="bncr_reserved3" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
         </field>
     </record>
-
 </odoo>
