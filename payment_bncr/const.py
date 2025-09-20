@@ -2,8 +2,7 @@
 
 # BNCR supported payment method codes
 DEFAULT_PAYMENT_METHOD_CODES = [
-    # Tarjetas de crédito
-    'card',
+    'bncr',
 ]
 
 # Mapeo de códigos de respuesta de BNCR a estados de transacción de Odoo
