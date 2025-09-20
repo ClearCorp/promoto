@@ -27,45 +27,31 @@
             </group>
         </field>
     </record>
-
-
-    <!-- Vista de formulario para transacciones con campos BNCR -->
+    
     <record id="payment_transaction_form_bncr" model="ir.ui.view">
-        <field name="name">payment.transaction.form.bncr</field>
+        <field name="name">BNCR Transaction Form</field>
         <field name="model">payment.transaction</field>
-        <field name="inherit_id" ref="payment.payment_transaction_form"/>
+        <field name="inherit_id" ref="payment.payment_transaction_form" />
         <field name="arch" type="xml">
-            <page name="extra_info" position="after">
-                <page string="BNCR Info" invisible="provider_code != 'bncr'">
-                    <group>
-                        <group string="Datos de Transacción BNCR">
-                            <field name="bncr_acquirer_id" readonly="1"/>
-                            <field name="bncr_commerce_id" readonly="1"/>
-                            <field name="bncr_purchase_operation_number" readonly="1"/>
-                            <field name="bncr_purchase_amount" readonly="1"/>
-                            <field name="bncr_purchase_currency_code" readonly="1"/>
-                            <field name="bncr_purchase_verification" readonly="1"/>
-                        </group>
-                        <group string="Datos de Envío">
-                            <field name="bncr_shipping_first_name" readonly="1"/>
-                            <field name="bncr_shipping_last_name" readonly="1"/>
-                            <field name="bncr_shipping_email" readonly="1"/>
-                            <field name="bncr_shipping_address" readonly="1"/>
-                            <field name="bncr_shipping_zip" readonly="1"/>
-                            <field name="bncr_shipping_city" readonly="1"/>
-                            <field name="bncr_shipping_state" readonly="1"/>
-                            <field name="bncr_shipping_country" readonly="1"/>
-                        </group>
-                        <group string="Campos Reservados">
-                            <field name="bncr_reserved1" readonly="1"/>
-                            <field name="bncr_reserved2" readonly="1"/>
-                            <field name="bncr_reserved3" readonly="1"/>
-                        </group>
-                    </group>
-                </page>
-            </xpath>
+            <field name="provider_reference" position="after">
+                <field name="bncr_acquirer_id" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_commerce_id" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_purchase_operation_number" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_purchase_amount" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_purchase_currency_code" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_purchase_verification" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_first_name" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_last_name" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_email" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_address" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_zip" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_city" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_state" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_shipping_country" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_reserved1" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_reserved2" invisible="provider_code != 'bncr'"/>
+                <field name="bncr_reserved3" invisible="provider_code != 'bncr'"/>
+            </field>
         </field>
     </record>
-
-
 </odoo>
