@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+	<record id="payment_method_bncr" model="payment.method">
+        <field name="name"><![CDATA[BNCR Payment Gateway]]></field>
+        <field name="code">bncr</field>
+        <field name="sequence">1000</field>
+        <field name="image" type="base64" file="payment_bncr/static/description/logo.png" />
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_refund">partial</field>
+    </record>
+	<record id="payment_method_visa_bncr" model="payment.method">
+        <field name="sequence">1001</field>
+        <field name="name">Visa</field>
+        <field name="image" type="base64" file="payment_bncr/static/description/visa.png"/>
+		<field name="code">visa_bncr</field>
+        <field name="primary_payment_method_id" eval="ref('payment_method_bncr')" />
+		<field name="active">True</field>
+    </record>
+	<record id="payment_method_master_bncr" model="payment.method">
+        <field name="sequence">1001</field>
+        <field name="name">Mastercard</field>
+        <field name="image" type="base64" file="payment_bncr/static/description/master.png"/>
+		<field name="code">master_bncr</field>
+        <field name="primary_payment_method_id" eval="ref('payment_method_bncr')" />
+		<field name="active">True</field>
+    </record>
+	<record id="payment_method_amex_bncr" model="payment.method">
+        <field name="sequence">1001</field>
+        <field name="name">American Express</field>
+        <field name="image" type="base64" file="payment_bncr/static/description/amex.png"/>
+		<field name="code">amex_bncr</field>
+        <field name="primary_payment_method_id" eval="ref('payment_method_bncr')" />
+		<field name="active">False</field>
+    </record>
+	<record id="payment_method_apple_pay_bncr" model="payment.method">
+        <field name="sequence">1001</field>
+        <field name="name">Apple Pay</field>
+        <field name="image" type="base64" file="payment_bncr/static/description/apple_pay.png"/>
+		<field name="code">apple_pay_bncr</field>
+        <field name="primary_payment_method_id" eval="ref('payment_method_bncr')" />
+		<field name="active">False</field>
+    </record>
+    <record id="payment_method_google_pay_bncr" model="payment.method">
+        <field name="sequence">1001</field>
+        <field name="name">Google Pay</field>
+        <field name="image" type="base64" file="payment_bncr/static/description/google_pay.png"/>
+		<field name="code">google_pay_bncr</field>
+        <field name="primary_payment_method_id" eval="ref('payment_method_bncr')" />
+		<field name="active">False</field>
+    </record>    
+</odoo>
