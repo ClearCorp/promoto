@@ -1,0 +1,172 @@
+// BNCR Payment Form Styles
+
+.o_bncr_payment_form {
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        
+        .card-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            
+            img {
+                filter: brightness(0) invert(1); // Hacer logo blanco
+            }
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(40, 167, 69, 0.3);
+            background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        }
+        
+        &:disabled {
+            background: #6c757d;
+            transform: none;
+            box-shadow: none;
+        }
+    }
+    
+    .alert-light {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+}
+
+.o_bncr_inline_payment {
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+    }
+}
+
+// Loading spinner personalizado
+#bncr_loading {
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.3em;
+    }
+}
+
+// Iconos de métodos de pago
+.o_payment_methods_icons {
+    .fa-credit-card,
+    .fa-university,
+    .fa-mobile-alt {
+        color: #6c757d;
+        transition: color 0.3s ease;
+        
+        &:hover {
+            color: #007bff;
+        }
+    }
+}
+
+// Responsivo
+@media (max-width: 768px) {
+    .o_bncr_payment_form {
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .btn-primary {
+            font-size: 1.1rem;
+            padding: 15px;
+        }
+    }
+}
+
+// Animaciones
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.o_bncr_payment_form {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+// Estados de la transacción
+.bncr_status_success {
+    .fa-check-circle {
+        animation: bounce 1s ease-in-out;
+    }
+}
+
+.bncr_status_error {
+    .fa-times-circle {
+        animation: shake 0.8s ease-in-out;
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0,0,0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -30px, 0);
+    }
+    70% {
+        transform: translate3d(0, -15px, 0);
+    }
+    90% {
+        transform: translate3d(0, -4px, 0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-10px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(10px);
+    }
+}
+
+// Formulario de configuración en backend
+.o_form_view {
+    .o_field_widget[name="bncr_secret_key"] input {
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+}
+
+// Highlight de campos BNCR en vista de transacción
+.o_form_view .oe_title {
+    .o_field_widget[name="bncr_purchase_operation_number"] {
+        color: #007bff;
+        font-weight: 500;
+    }
+}
