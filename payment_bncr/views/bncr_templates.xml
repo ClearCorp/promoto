@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="inject_bncr_script_in_head" name="Inject BNCR Script in Head" inherit_id="website.layout">
+        <xpath expr="//head" position="inside">
+            <script type="text/javascript" src="https://integracion.alignetsac.com/VPOS2/js/modalcomercio.js"></script>
+        </xpath>
+    </template>
+</odoo>

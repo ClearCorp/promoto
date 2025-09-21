@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="payment_bncr.method_form" inherit_id="payment.method_form">
+        <input name="o_payment_radio" position="attributes">
+            <attribute name="t-if" t-elif="provider_code == 'bncr'">
+                t-att-data-bncr-inline-form-values="provider_sudo._bncr_get_inline_form_values()"
+            </attribute>
+        </input>
+    </template>
+
+    <template id="payment_submit_button_inherit_bncr" inherit_id="payment.submit_button">
+        <xpath expr="//button[@name='o_payment_submit_button']" position="before">
+            <div t-if="provider_code == 'bncr'"
+                id="o_bncr_button_container"
+                name="o_payment_submit_button"
+                data-is-bncr="true"
+                class="d-none"
+            >
+                <button id="o_bncr_pay_button" type="button" class="btn btn-primary">
+                    <span>Pagar ahora con BNCR <i class="fa fa-chevron-right"/></span>
+                </button>
+            </div>
+            <div t-if="provider_code == 'bncr'" id="o_bncr_loading" class="d-flex justify-content-center d-none">
+                <div class="spinner-border"/>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

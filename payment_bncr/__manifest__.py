@@ -8,15 +8,15 @@
     'website': 'www.promotoglobal.com',
     'depends': ['payment'],
     'data': [
-        'views/payment_bncr_templates.xml',
+        'views/payment_form_templates.xml',
         'views/payment_provider_views.xml',
+        'views/bncr_templates.xml',
 		'data/payment_method_data.xml',
         'data/payment_provider_data.xml',
     ],
     'assets': {
         'web.assets_frontend': [
-            'payment_bncr/static/src/scss/payment_bncr.scss',
-            'payment_bncr/static/src/js/payment_form.js',
+            'payment_bncr/static/src/**/*',
         ],
     },
     'application': True,

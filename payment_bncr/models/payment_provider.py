@@ -58,7 +58,15 @@ class Paymentprovider(models.Model):
             'support_refund': 'partial',
             'support_tokenization': False,  # BNCR doesn't support tokenization
             'support_manual_capture': False,  # BNCR processes immediately
-        })    
+        }) 
+
+    def _bncr_get_inline_form_values(self):
+        """ Devuelve los valores necesarios para inicializar el JS de BNCR. """
+        self.ensure_one()
+        return json.dumps({
+            'modal_script_url': self.bncr_modal_script_url,
+            'gateway_url': self.bncr_gateway_url,
+        })   
     
     def _bncr_calculate_signature(self, acquirer_id, commerce_id, operation_number, amount, currency_code):
         """ Compute the SHA-512 signature for BNCR according to their documentation.

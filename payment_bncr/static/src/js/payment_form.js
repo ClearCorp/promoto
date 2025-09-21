@@ -1,225 +1,113 @@
-/** @odoo-module **/
+/* global AlignetVPOS2 */
 
-import { _t } from "@web/core/l10n/translation";
-import { loadJS } from "@web/core/assets";
-import { registry } from "@web/core/registry";
-import { Component } from "@odoo/owl";
+import { loadJS } from '@web/core/assets';
+import paymentForm from '@payment/js/payment_form';
 
-// Extender PaymentForm para manejar BNCR - Compatible con Odoo 18
-export class BNCRPaymentForm extends Component {
-    
+paymentForm.include({
+    bncrData: undefined,
+
+    // #=== MANIPULACIÓN DEL DOM ===#
+
     /**
-     * Procesar el formulario de pago BNCR
+     * Oculta el contenedor del botón de BNCR si se expande otro proveedor.
+     * @override
      */
-    async _processBNCRPayment(processingValues) {
-        
-        // Verificar que tenemos los datos necesarios
-        if (!processingValues.modal_script_url) {
-            this._displayError(
-                _t("Configuration Error"),
-                _t("BNCR modal script URL is not configured.")
-            );
-            return Promise.reject("Missing BNCR configuration");
+    async _expandInlineForm(radio) {
+        const providerCode = this._getProviderCode(radio);
+        if (providerCode !== 'bncr') {
+            document.getElementById('o_bncr_button_container')?.classList.add('d-none');
         }
-        
-        try {
-            // Cargar el script del modal de BNCR si no está cargado
-            if (typeof window.AlignetVPOS2 === 'undefined') {
-                await this._loadBNCRScript(processingValues.modal_script_url);
-            }
-            
-            // Preparar el formulario para BNCR
-            this._prepareBNCRForm(processingValues);
-            
-            // Abrir el modal de BNCR
-            return this._openBNCRModal(processingValues.api_url);
-            
-        } catch (error) {
-            console.error('BNCR: Error processing payment', error);
-            this._displayError(
-                _t("Payment Error"),
-                _t("There was an error initializing the payment system. Please try again.")
-            );
-            return Promise.reject(error);
-        }
-    }
-    
+        this._super(...arguments);
+    },
+
     /**
-     * Cargar el script de BNCR
+     * Prepara el formulario inline para BNCR.
+     * Carga el script del modal de BNCR y prepara el botón de pago.
+     * @override
+     */
+    async _prepareInlineForm(providerId, providerCode, paymentOptionId) {
+        if (providerCode !== 'bncr') {
+            this._super(...arguments);
+            return;
+        }
+
+        this._hideInputs();
+        this._setPaymentFlow('direct');
+        document.getElementById('o_bncr_loading').classList.remove('d-none');
+
+        this.bncrData ??= {};
+        this.bncrData[paymentOptionId] ??= {};
+
+        // Carga el SDK de BNCR solo una vez.
+        if (!this.bncrData[paymentOptionId].isSdkLoaded) {
+            const radio = document.querySelector(`input[name="o_payment_radio"][data-payment-option-id="${paymentOptionId}"]`);
+            const inlineFormValues = JSON.parse(radio.dataset['bncrInlineFormValues']);
+            
+            this.bncrData[paymentOptionId].inlineFormValues = inlineFormValues;
+
+            // La URL del script se obtiene desde la configuración del proveedor en Odoo.
+            await loadJS(inlineFormValues.modal_script_url);
+            this.bncrData[paymentOptionId].isSdkLoaded = true;
+
+            const payButton = document.getElementById('o_bncr_pay_button');
+            payButton.addEventListener('click', this._bncrOnClick.bind(this));
+        }
+
+        document.getElementById('o_bncr_loading').classList.add('d-none');
+        document.getElementById('o_bncr_button_container').classList.remove('d-none');
+    },
+
+    // #=== FLUJO DE PAGO ===#
+
+    /**
+     * Inicia el flujo de pago al hacer clic en el botón.
+     * Llama al backend de Odoo para crear la transacción y obtener los datos firmados.
      * @private
-     * @param {string} scriptUrl - URL del script
-     * @returns {Promise}
      */
-    async _loadBNCRScript(scriptUrl) {
-        try {
-            await loadJS(scriptUrl);
-            
-            // Verificar que el objeto AlignetVPOS2 esté disponible
-            if (typeof window.AlignetVPOS2 === 'undefined') {
-                throw new Error('AlignetVPOS2 object not found after loading script');
-            }
-            
-            console.log('BNCR: Script loaded successfully');
-        } catch (error) {
-            console.error('BNCR: Failed to load script', error);
-            throw new Error(`Failed to load BNCR script: ${error.message}`);
-        }
-    }
-    
+    async _bncrOnClick() {
+        this._disableButton();
+        // Llama a _submitForm, lo que activará _get_specific_rendering_values en el backend
+        // y el resultado se pasará a _processDirectFlow.
+        await this._submitForm(new Event("BncrClickEvent"));
+    },
+
     /**
-     * Preparar el formulario HTML para BNCR
-     * @private
-     * @param {Object} processingValues - Valores de procesamiento
+     * Procesa los datos recibidos del backend, construye el formulario para BNCR y abre el modal.
+     * @override
      */
-    _prepareBNCRForm(processingValues) {
-        // Buscar o crear el formulario BNCR
-        let form = document.getElementById('bncr_payment_form');
-        
-        if (!form) {
-            form = document.createElement('form');
-            form.id = 'bncr_payment_form';
-            form.name = 'bncr_payment_form';
-            form.method = 'post';
-            form.className = 'alignet-form-vpos2';
-            form.style.display = 'none';
-            document.body.appendChild(form);
-        } else {
-            // Limpiar formulario existente
-            form.innerHTML = '';
+    _processDirectFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
+        if (providerCode !== 'bncr') {
+            this._super(...arguments);
+            return;
         }
-        
-        // Agregar campos del payment_data
+
+        const { gateway_url } = this.bncrData[paymentOptionId].inlineFormValues;
         const paymentData = processingValues.payment_data;
+
+        // Elimina cualquier formulario antiguo para evitar conflictos.
+        const oldForm = document.getElementById('f1_bncr');
+        if (oldForm) {
+            oldForm.remove();
+        }
+
+        // Crea dinámicamente el formulario que Alignet/BNCR VPOS2 necesita.
+        const form = document.createElement('form');
+        form.setAttribute('name', 'f1');
+        form.setAttribute('id', 'f1_bncr'); // Usamos un ID único
+        form.setAttribute('method', 'post');
+        
+        // El backend ya nos dio un diccionario 'payment_data' con todos los campos necesarios.
         for (const [key, value] of Object.entries(paymentData)) {
             const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = value || '';
+            input.setAttribute('type', 'hidden');
+            input.setAttribute('name', key);
+            input.setAttribute('value', value);
             form.appendChild(input);
         }
+        document.body.appendChild(form);
         
-        console.log('BNCR: Form prepared with data', paymentData);
-    }
-    
-    /**
-     * Abrir el modal de BNCR
-     * @private
-     * @param {string} apiUrl - URL de la API
-     * @returns {Promise}
-     */
-    _openBNCRModal(apiUrl) {
-        return new Promise((resolve, reject) => {
-            try {
-                // Configurar callbacks para el modal
-                this._setupBNCRCallbacks(resolve, reject);
-                
-                // Abrir el modal
-                window.AlignetVPOS2.openModal(apiUrl);
-                
-                console.log('BNCR: Modal opened');
-                
-            } catch (error) {
-                console.error('BNCR: Error opening modal', error);
-                reject(error);
-            }
-        });
-    }
-    
-    /**
-     * Configurar callbacks para el modal de BNCR
-     * @private
-     * @param {Function} resolve - Función resolve de la Promise
-     * @param {Function} reject - Función reject de la Promise
-     */
-    _setupBNCRCallbacks(resolve, reject) {
-        
-        // Timeout para evitar que se quede colgado
-        const timeout = setTimeout(() => {
-            this._displayError(
-                _t("Payment Timeout"),
-                _t("The payment process is taking too long. Please try again.")
-            );
-            reject(new Error('Payment timeout'));
-        }, 300000); // 5 minutos
-        
-        // Cleanup function
-        const cleanup = () => {
-            clearTimeout(timeout);
-        };
-        
-        // Escuchar mensajes del modal
-        const messageHandler = (event) => {
-            // Verificar origen del mensaje por seguridad
-            if (!event.origin.includes('alignetsac.com')) {
-                return;
-            }
-            
-            try {
-                const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-                
-                if (data.type === 'bncr_success') {
-                    cleanup();
-                    window.removeEventListener('message', messageHandler);
-                    resolve(data);
-                } else if (data.type === 'bncr_error' || data.type === 'bncr_cancel') {
-                    cleanup();
-                    window.removeEventListener('message', messageHandler);
-                    reject(new Error(data.message || 'Payment failed'));
-                }
-            } catch (e) {
-                console.warn('BNCR: Invalid message format', event.data);
-            }
-        };
-        
-        window.addEventListener('message', messageHandler);
-    }
-    
-    /**
-     * Mostrar error al usuario
-     * @private
-     * @param {string} title - Título del error
-     * @param {string} message - Mensaje del error
-     */
-    _displayError(title, message) {
-        // Usar el sistema de notificaciones de Odoo 18
-        if (this.env && this.env.services && this.env.services.notification) {
-            this.env.services.notification.add(message, {
-                title: title,
-                type: 'danger',
-                sticky: true,
-            });
-        } else {
-            // Fallback para mostrar error
-            console.error(`${title}: ${message}`);
-            alert(`${title}: ${message}`);
-        }
-    }
-}
-
-// Registrar el componente para Odoo 18
-registry.category("payment_form").add("bncr", BNCRPaymentForm);
-
-// Funciones globales para compatibilidad con BNCR
-window.bncrPaymentSuccess = function(data) {
-    console.log('BNCR: Payment successful', data);
-    window.postMessage({
-        type: 'bncr_success',
-        data: data
-    }, window.location.origin);
-};
-
-window.bncrPaymentError = function(error) {
-    console.error('BNCR: Payment error', error);
-    window.postMessage({
-        type: 'bncr_error',
-        message: error.message || 'Payment failed'
-    }, window.location.origin);
-};
-
-window.bncrPaymentCancel = function() {
-    console.log('BNCR: Payment cancelled');
-    window.postMessage({
-        type: 'bncr_cancel',
-        message: 'Payment cancelled by user'
-    }, window.location.origin);
-};
+        // Abre el modal de BNCR. El script cargado (AlignetVPOS2) se encarga del resto.
+        // Nota: Asumimos que el script de BNCR expone el objeto global AlignetVPOS2.
+        AlignetVPOS2.openModal(gateway_url);
+    },
+});
