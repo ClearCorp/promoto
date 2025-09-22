@@ -3,22 +3,53 @@
 
     <template id="payment_bncr.method_form" inherit_id="payment.method_form">
         <input name="o_payment_radio" position="attributes">
-            <attribute name="t-if" t-elif="provider_code == 'bncr'">
-                t-att-data-bncr-inline-form-values="provider_sudo._bncr_get_inline_form_values()"
+            <attribute name="t-att-data-bncr-inline-form-values">
+                provider_sudo._bncr_get_inline_form_values()
             </attribute>
         </input>
     </template>
 
     <template id="payment_submit_button_inherit" inherit_id="payment.submit_button">
-        <button name="o_payment_submit_button" position="before">
-            <div
-                id="o_bncr_button_container" name="o_payment_submit_button" data-is-bncr="true"
+        <button name="o_payment_submit_button" position="replace">
+            <!-- Botón original de Odoo -->
+            <button
+                id="o_payment_submit_button"
+                name="o_payment_submit_button" 
+                class="btn btn-primary btn-lg w-100"
+                type="submit"
+                disabled="disabled"
+                data-is-bncr="false"
             >
-                <div id="o_bncr_enabled_button" class="d-none"/>
-                <div id="o_bncr_disabled_button"/>
+                <i class="fa fa-lock"/> <t t-esc="submit_button_label or 'Pay Now'"/>
+            </button>
+            
+            <!-- Container específico para BNCR -->
+            <div
+                id="o_bncr_button_container" 
+                class="d-none"
+                data-is-bncr="true"
+            >
+                <button
+                    id="o_bncr_enabled_button"
+                    class="btn btn-primary btn-lg w-100 d-none"
+                    type="button"
+                >
+                    <i class="fa fa-credit-card"/> Pagar con BNCR
+                </button>
+                <button
+                    id="o_bncr_disabled_button"
+                    class="btn btn-secondary btn-lg w-100"
+                    type="button"
+                    disabled="disabled"
+                >
+                    <i class="fa fa-spinner fa-spin"/> Procesando...
+                </button>
             </div>
+            
             <div id="o_bncr_loading" class="d-flex justify-content-center d-none">
-                <div class="spinner-border"/>
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
             </div>
         </button>
     </template>
