@@ -4,6 +4,9 @@ import paymentButton from '@payment/js/payment_button';
 
 paymentButton.include({
 
+
+
+
     /**
      * Habilita el botón de pago de BNCR.
      * @override
@@ -13,7 +16,8 @@ paymentButton.include({
             this._super();
             return;
         }
-        this.paymentButton.querySelector('#o_bncr_pay_button').removeAttribute('disabled');
+        document.getElementById('o_bncr_disabled_button').classList.add('d-none');
+        document.getElementById('o_bncr_enabled_button').classList.remove('d-none');
     },
 
     /**
@@ -25,7 +29,8 @@ paymentButton.include({
             this._super();
             return;
         }
-        this.paymentButton.querySelector('#o_bncr_pay_button').setAttribute('disabled', 'disabled');
+        document.getElementById('o_bncr_disabled_button').classList.remove('d-none');
+        document.getElementById('o_bncr_enabled_button').classList.add('d-none');
     },
 
     /**

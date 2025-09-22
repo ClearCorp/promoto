@@ -49,7 +49,7 @@ paymentForm.include({
             await loadJS(inlineFormValues.modal_script_url);
             this.bncrData[paymentOptionId].isSdkLoaded = true;
 
-            const payButton = document.getElementById('o_bncr_pay_button');
+            const payButton = document.getElementById('o_payment_submit_button');
             payButton.addEventListener('click', this._bncrOnClick.bind(this));
         }
 
