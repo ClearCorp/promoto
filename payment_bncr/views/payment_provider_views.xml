@@ -18,10 +18,8 @@
                             required="code == 'bncr' and state != 'disabled'"
                             placeholder="clave_secreta_sha2"/>
                     <field name="bncr_gateway_url" 
-                            required="code == 'bncr' and state != 'disabled'"
                             placeholder="https://integracion.alignetsac.com/"/>
                     <field name="bncr_modal_script_url"
-                        required="code == 'bncr' and state != 'disabled'" 
                             placeholder="https://integracion.alignetsac.com/VPOS2/js/modalcomercio.js"/>
                 </group>
             </group>
